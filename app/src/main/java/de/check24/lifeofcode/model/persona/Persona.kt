@@ -9,11 +9,13 @@ sealed class Persona(
 
     object Developer : Persona(
         name = "Developer",
-        availableTimePerIteration = Hours(40)
+        // 1/8 of time for meetings, etc.
+        availableTimePerIteration = Hours(35)
     )
 
     object ProductManager: Persona(
         name = "Product Manager",
-        availableTimePerIteration = Hours(20) // time for screening the market, etc.
+        // 1/2 of time for screening the market, etc.
+        availableTimePerIteration = Hours(20)
     )
 }
