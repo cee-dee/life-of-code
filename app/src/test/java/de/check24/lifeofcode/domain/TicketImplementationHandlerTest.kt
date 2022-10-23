@@ -37,7 +37,8 @@ class TicketImplementationHandlerTest {
                 idealVerificationTimeForPm = Hours(hours = 0)
             )
         )
-        val sut = TicketImplementationHandler()
+        val implementationTimeComputer = ImplementationTimeComputer()
+        val sut = TicketImplementationHandler(implementationTimeComputer)
 
         val actualGameState = sut.handle(
             gameState = gameState,
