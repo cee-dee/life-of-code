@@ -3,6 +3,7 @@ package de.check24.lifeofcode.domain
 import de.check24.lifeofcode.model.codebase.QualityMap
 import de.check24.lifeofcode.model.gamestate.GameState
 import de.check24.lifeofcode.model.tickets.*
+import de.check24.lifeofcode.model.work.Week
 import de.check24.lifeofcode.model.work.WorkLogEntry
 
 class TicketImplementationHandler {
@@ -14,7 +15,8 @@ class TicketImplementationHandler {
         val currentCalendarWeek = gameState.calendarWeek
         val qualityMap = gameState.qualityMap
         val availableDeveloperTime = gameState.availableDeveloperTime
-        val idealImplementationTimeForDeveloper = ticket.untilReleaseTimeRequirements.idealImplementationTimeForDeveloper
+        val idealImplementationTimeForDeveloper =
+            ticket.untilReleaseTimeRequirements.idealImplementationTimeForDeveloper
 
         val implementationTimeForDeveloper = computeImplementationTimeForDeveloper(
             idealImplementationTimeForDeveloper,
@@ -37,12 +39,21 @@ class TicketImplementationHandler {
         val newWorkLog = gameState.workLog.copy(
             entries = gameState.workLog.entries + workLogEntry
         )
+        val newTicketHistory = gameState.ticketHistory.copy(
+            handledTickets = gameState.ticketHistory.handledTickets + HandledTicket(
+                ticket = ticket,
+                implementationStartDate = currentCalendarWeek,
+                // FIXME: handle case where implementation of a ticket takes more than 1 week
+                readyForVerificationDate = currentCalendarWeek + Week(1)
+            )
+        )
 
         // FIXME: modify QualityMap depending on ShortCuts
 
         return gameState.copy(
             availableDeveloperTime = newAvailableDeveloperTime,
-            workLog = newWorkLog
+            workLog = newWorkLog,
+            ticketHistory = newTicketHistory
         )
     }
 
