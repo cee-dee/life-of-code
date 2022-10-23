@@ -1,6 +1,7 @@
 package de.check24.lifeofcode.domain
 
 import de.check24.lifeofcode.model.gamestate.GameState
+import de.check24.lifeofcode.model.shortcuts.ShortCut
 import de.check24.lifeofcode.model.tickets.*
 import de.check24.lifeofcode.model.work.Week
 import de.check24.lifeofcode.model.work.WorkLogEntry
@@ -11,7 +12,8 @@ class TicketImplementationHandler(
 
     fun handle(
         gameState: GameState,
-        ticket: Ticket
+        ticket: Ticket,
+        shortCuts: List<ShortCut>
     ): GameState {
         val currentCalendarWeek = gameState.calendarWeek
         val qualityMap = gameState.qualityMap
@@ -19,12 +21,17 @@ class TicketImplementationHandler(
         val idealImplementationTimeForDeveloper =
             ticket.untilReleaseTimeRequirements.idealImplementationTimeForDeveloper
 
-        val implementationTimeForDeveloper = implementationTimeComputer.compute(
-            idealImplementationTimeForDeveloper,
-            ticket.relativeAreas,
-            qualityMap
+        val output = implementationTimeComputer.compute(
+            ImplementationTimeComputer.Input(
+                gameState = gameState,
+                idealImplementationTimeForDeveloper = idealImplementationTimeForDeveloper,
+                relativeAreas = ticket.relativeAreas,
+                qualityMap = qualityMap,
+                shortCuts = shortCuts
+            )
         )
-
+        val updatedGameState = output.gameState
+        val implementationTimeForDeveloper = output.implementationHours
         // assume that you can split up the work for a ticket amongst all developers
         val spentDeveloperTimeOnTicket = min(
             implementationTimeForDeveloper,
@@ -37,11 +44,11 @@ class TicketImplementationHandler(
             calendarWeek = currentCalendarWeek,
             time = spentDeveloperTimeOnTicket
         )
-        val newWorkLog = gameState.workLog.copy(
-            entries = gameState.workLog.entries + workLogEntry
+        val newWorkLog = updatedGameState.workLog.copy(
+            entries = updatedGameState.workLog.entries + workLogEntry
         )
-        val newTicketHistory = gameState.ticketHistory.copy(
-            handledTickets = gameState.ticketHistory.handledTickets + HandledTicket(
+        val newTicketHistory = updatedGameState.ticketHistory.copy(
+            handledTickets = updatedGameState.ticketHistory.handledTickets + HandledTicket(
                 ticket = ticket,
                 implementationStartDate = currentCalendarWeek,
                 // FIXME: handle case where implementation of a ticket takes more than 1 week
@@ -51,7 +58,7 @@ class TicketImplementationHandler(
 
         // FIXME: modify QualityMap depending on ShortCuts
 
-        return gameState.copy(
+        return updatedGameState.copy(
             availableDeveloperTime = newAvailableDeveloperTime,
             workLog = newWorkLog,
             ticketHistory = newTicketHistory

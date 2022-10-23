@@ -1,10 +1,10 @@
 package de.check24.lifeofcode.domain
 
-import de.check24.lifeofcode.model.shortcuts.Effect
+import de.check24.lifeofcode.model.shortcuts.TicketEffect
 import de.check24.lifeofcode.model.shortcuts.ShortCut
 
 interface EffectFactory {
-    fun computeEffect(shortCut: ShortCut): List<Effect>
+    fun computeEffect(shortCut: ShortCut): List<TicketEffect>
 }
 
 /*
